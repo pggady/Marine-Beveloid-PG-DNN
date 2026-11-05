@@ -65,3 +65,7 @@ against undercutting and pointing, module `gear_calculations`) is not included i
 evaluation of the PG-DNN and the plotting scripts run without it. `tpe.py`, `ga_baseline.py`, `robustness_mc.py` and
 the scripts that build the gearbox model require it; the results of these runs are provided in `results_tpe/` and
 `results_ga/`.
+
+## License
+
+This project is licensed under the MIT License (see `LICENSE`).
