@@ -2,7 +2,6 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 from system import TransmissionSystem
-# 假设 gear_calculations 已经包含了您之前修复的 clip 逻辑
 from gear_calculations import GearCalculations 
 from contact_stress import calculate_hertz_contact_stress
 # 延迟导入PINN，避免模块级别导入PyTorch
