@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "n_trials": 1000,
+    "n_startup": 10,
+    "seed": 1,
+    "surrogate": "pinn",
+    "width_factor": 0.8,
+    "p0": 1500.0,
+    "bounds": "paper",
+    "beta3_min": 5.0,
+    "beta3_max": 30.0,
+    "model_dir": "pinn_model",
+    "out": "results_tpe/pinn_w0.8_seed1"
+  },
+  "wall_clock_s": 3121.3446390628815,
+  "n_trials": 1000,
+  "stage_counts": {
+    "pruned_geometry": 28,
+    "solver_feasible": 535,
+    "solver_infeasible": 1,
+    "surrogate_infeasible": 436
+  },
+  "first_feasible_trial": 12,
+  "timing": {
+    "geometry_s": 67.35764217376709,
+    "solver_s": 543.7127249240875,
+    "solver_calls": 1072,
+    "pinn_calls": 1944
+  },
+  "matlab_restarts": 3,
+  "best": {
+    "trial": 956,
+    "O_b": 1611.4056913071881,
+    "params": {
+      "gama1": 4.126965804240219,
+      "gama2_gear1": 2.419353171623168,
+      "gama2_gear2": 3.4982712350342964,
+      "beta3": 29.99811830409556,
+      "xt3": 0.4799296277036674
+    },
+    "min_safety": 1.2766,
+    "kesai_L": 3.6332,
+    "kesai_R": -7.2054,
+    "Pmax_pair1": 924.5827422962775,
+    "a_len_pair1": 29.041286231843223,
+    "Pmax_pair2": 686.8229490109107,
+    "a_len_pair2": 49.124654883803856,
+    "constraints": [
+      -0.026599999999999957,
+      -1.7506902323922873,
+      -41.917427536313554,
+      -575.4172577037225
+    ]
+  },
+  "versions": {
+    "python": "3.9.25",
+    "optuna": "4.6.0",
+    "torch": "2.5.1",
+    "numpy": "2.0.2"
+  },
+  "pinn_model_dir": "pinn_model",
+  "finished": "2026-10-30T09:13:43"
+}

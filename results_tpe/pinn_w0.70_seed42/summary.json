@@ -1,0 +1,38 @@
+{
+  "settings": {
+    "n_trials": 1000,
+    "n_startup": 10,
+    "seed": 42,
+    "surrogate": "pinn",
+    "width_factor": 0.7,
+    "p0": 1500.0,
+    "bounds": "paper",
+    "beta3_min": 5.0,
+    "beta3_max": 30.0,
+    "model_dir": "pinn_model",
+    "out": "results_tpe/pinn_w0.70_seed42"
+  },
+  "wall_clock_s": 2209.637042284012,
+  "n_trials": 1000,
+  "stage_counts": {
+    "pruned_geometry": 359,
+    "surrogate_infeasible": 641
+  },
+  "first_feasible_trial": null,
+  "timing": {
+    "geometry_s": 46.03933620452881,
+    "solver_s": 0.0,
+    "solver_calls": 0,
+    "pinn_calls": 1282
+  },
+  "matlab_restarts": 1,
+  "best": null,
+  "versions": {
+    "python": "3.9.25",
+    "optuna": "4.6.0",
+    "torch": "2.5.1",
+    "numpy": "2.0.2"
+  },
+  "pinn_model_dir": "pinn_model",
+  "finished": "2026-10-30T09:07:45"
+}

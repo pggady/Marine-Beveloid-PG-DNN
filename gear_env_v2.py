@@ -14,15 +14,58 @@ warnings.filterwarnings("ignore")
 
 # 全局PINN模型实例（延迟加载）
 _pinn_predictor = None
+# PG-DNN 模型目录（tpe.py 可在加载前修改）
+PINN_MODEL_DIR = 'pgnn_model'
 
 def get_pinn_predictor():
     """获取或加载PINN预测器（延迟导入PyTorch）"""
     global _pinn_predictor
     if _pinn_predictor is None:
-        from pinn_contact_stress import PIINStressPredictor
+        from pgnn_contact_stress import PIINStressPredictor
         _pinn_predictor = PIINStressPredictor()
-        _pinn_predictor.load()
+        _pinn_predictor.load(PINN_MODEL_DIR)
     return _pinn_predictor
+
+
+def predict_contact_stress_solver(params):
+    """
+    使用 Hertz 求解器计算接触应力（精筛验证与无代理模型基准用）
+
+    Args:
+        params: 与 predict_contact_stress_pinn 相同的12个参数（角度用度数）
+
+    Returns:
+        dict: {'Pmax': float, 'a_len': float, 'valid': bool}
+    """
+    calc_params = {
+        'gama1': np.radians(params['gama1']),
+        'gama2': np.radians(params['gama2']),
+        'beta1': np.radians(params['beta1']),
+        'beta2': np.radians(params['beta2']),
+        'N1': int(params['N1']),
+        'N2': int(params['N2']),
+        'mn': params['mn'],
+        'an': np.radians(params['an']),
+        'E': params['E'],
+        'nu': params['nu'],
+        'b1': 188.0,  # 与训练数据生成时一致
+        'b2': 180.0,
+        'Fn': params['Fn'],
+        'kesai': params['kesai'],
+        'sigma_rad': np.radians(params['kesai']),
+        'xt1': 0.0,  # 与训练数据一致：变位系数取0
+        'xt2': 0.0,
+        'fuhao': -1,
+        'drive_gear': 1
+    }
+    try:
+        result = calculate_hertz_contact_stress(calc_params)
+        if result is None or not result.get('valid', False):
+            return {'Pmax': np.nan, 'a_len': np.nan, 'valid': False}
+        return {'Pmax': float(result['Pmax']), 'a_len': float(result['a_len']), 'valid': True}
+    except Exception as e:
+        print(f"Hertz求解器错误: {e}")  # 调试信息
+        return {'Pmax': np.nan, 'a_len': np.nan, 'valid': False}
 
 def predict_contact_stress_pinn(params):
     """
@@ -306,7 +349,8 @@ class GearEnvV2(gym.Env):
                 gama1_pair1 = self.current_params['gama1']  # 度
                 gama2_pair1 = self.current_params['gama2_gear2']  # 度
                 beta1_pair1 = self.current_params['beta3']  # 度
-                beta2_pair1 = -self.current_params['beta3']  # 度（反向）
+                # 从计算结果获取小齿轮2的螺旋角（弧度制 → 度），缺省时取反向的 beta3
+                beta2_pair1 = np.degrees(p1_result.get('beta2', -np.radians(beta1_pair1)))
                 
                 # 选择FPD角（根据接触面）
                 contact_face_pair1 = self.base_params["gear2"].get("contact_face", "right")
@@ -326,6 +370,7 @@ class GearEnvV2(gym.Env):
                     'Fn': abs(Fn_pair1), 'kesai': kesai_pair1, 'an': an,
                     'E': E, 'nu': nu
                 }
+                vals['contact_inputs_pair1'] = pinn_params_pair1
                 pinn_result_pair1 = predict_contact_stress_pinn(pinn_params_pair1)
                 vals['Pmax_pair1'] = pinn_result_pair1['Pmax'] if pinn_result_pair1['valid'] else np.nan
                 vals['a_len_pair1'] = pinn_result_pair1['a_len'] if pinn_result_pair1['valid'] else np.nan
@@ -347,7 +392,7 @@ class GearEnvV2(gym.Env):
                 # 计算法向力Fn（使用小齿轮1计算）
                 r2_pair2 = (mn * N2_pair2) / (2 * np.cos(np.radians(beta2_pair2)))
                 n2_pair2 = n1  # 小齿轮转速
-                Fn_pair2 = 9550 * P * 1000 / (n2_pair2 * r2_pair2 * np.cos(np.radians(beta2_pair2)) * np.cos(np.radians(an)))
+                Fn_pair2 = 9549 * P * 1000 / (n2_pair2 * r2_pair2 * np.cos(np.radians(beta2_pair2)) * np.cos(np.radians(an)))
                 
                 # PINN预测输入
                 pinn_params_pair2 = {
@@ -357,6 +402,7 @@ class GearEnvV2(gym.Env):
                     'Fn': abs(Fn_pair2), 'kesai': kesai_pair2, 'an': an,
                     'E': E, 'nu': nu
                 }
+                vals['contact_inputs_pair2'] = pinn_params_pair2
                 pinn_result_pair2 = predict_contact_stress_pinn(pinn_params_pair2)
                 vals['Pmax_pair2'] = pinn_result_pair2['Pmax'] if pinn_result_pair2['valid'] else np.nan
                 vals['a_len_pair2'] = pinn_result_pair2['a_len'] if pinn_result_pair2['valid'] else np.nan
@@ -394,15 +440,34 @@ class GearEnvV2(gym.Env):
             # 提取所有安全系数
             'Sg1_1': get_val(t1, 'Sg1'), 'Sj1_1': get_val(t1, 'Sj1'),
             'Sg2_1': get_val(t1, 'Sg2'), 'Sj2_1': get_val(t1, 'Sj2'),
-            'Sg2_2': get_val(t2, 'Sg2'), 'Sj2_2': get_val(t2, 'Sj2')
+            'Sg2_2': get_val(t2, 'Sg2'), 'Sj2_2': get_val(t2, 'Sj2'),
+            # 齿轮3在交错轴齿轮对中的安全系数
+            'Sg1_2': get_val(t2, 'Sg1'), 'Sj1_2': get_val(t2, 'Sj1')
         }
-        
-        # 计算最小安全系数
+
+        # 计算最小安全系数（齿轮3在两个齿轮对中的安全系数都计入）
         vals['min_safety'] = min(
-            vals['Sg1_1'], vals['Sj1_1'], vals['Sg2_1'], vals['Sj2_1'], 
-            vals['Sg2_2'], vals['Sj2_2']
+            vals['Sg1_1'], vals['Sj1_1'], vals['Sg2_1'], vals['Sj2_1'],
+            vals['Sg2_2'], vals['Sj2_2'], vals['Sg1_2'], vals['Sj1_2']
         )
         return vals
+
+    def evaluate_contact_solver(self, metrics):
+        """
+        用 Hertz 求解器重新计算两个齿轮对的接触应力和半长轴（精筛）
+
+        Args:
+            metrics: _calculate_metrics() 的返回值，需包含 contact_inputs_pair1/2
+
+        Returns:
+            dict: Pmax_pair1, a_len_pair1, Pmax_pair2, a_len_pair2
+        """
+        out = {}
+        for pair in ('pair1', 'pair2'):
+            res = predict_contact_stress_solver(metrics[f'contact_inputs_{pair}'])
+            out[f'Pmax_{pair}'] = res['Pmax']
+            out[f'a_len_{pair}'] = res['a_len']
+        return out
 
     def _compute_reward(self, metrics):
         """分层课程奖励计算"""

@@ -134,7 +134,7 @@ def create_example_system():
             "nu": 0.3,          # 泊松比
             "P": 850,           # 功率 (kW)
             "n1": 2500,         # 小齿轮转速 (rpm)
-            "Pmax_limit": 1500, # 许用接触应力上限 (MPa)
+            "Pmax_limit": 1347.76, # 许用接触应力 σHP (MPa)，ISO 6336-2:2019，KISSsoft 2026 计算
         }    
     }
     return system_params
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     
     # 汇总
     Pmax_max = max(pred_p1[0,0], pred_p2[0,0])
-    Pmax_limit = gear3.get("Pmax_limit", 1500)
+    Pmax_limit = gear3.get("Pmax_limit", 1347.76)
     print(f"\n{'=' * 60}")
     print(f"  最大接触应力 Pmax = {Pmax_max:.2f} MPa (许用值: {Pmax_limit} MPa)")
     if Pmax_max < Pmax_limit:

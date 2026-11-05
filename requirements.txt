@@ -1,7 +1,10 @@
-numpy
-gymnasium
-torch
-optuna
-pandas
-scipy
-joblib
+torch==2.5.1
+optuna==4.6.0
+numpy==2.0.2
+pandas==2.3.3
+scipy==1.13.1
+sympy==1.14.0
+scikit-learn==1.6.1
+joblib==1.5.2
+matplotlib==3.9.2
+gymnasium==0.28.1

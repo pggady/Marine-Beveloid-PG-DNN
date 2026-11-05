@@ -1,0 +1,56 @@
+{
+  "settings": {
+    "seed": 4,
+    "pop": 40,
+    "generations": 25,
+    "penalty": 1000.0,
+    "crossover": 0.9,
+    "elite": 2,
+    "surrogate": "pinn",
+    "width_factor": 0.8,
+    "p0": 1500.0,
+    "bounds": "paper",
+    "beta3_min": 5.0,
+    "beta3_max": 30.0,
+    "model_dir": "pinn_model",
+    "out": "results_ga/seed4"
+  },
+  "wall_clock_s": 587.7486293315887,
+  "n_evaluations": 952,
+  "stage_counts": {
+    "pruned_geometry": 3,
+    "solver_feasible": 678,
+    "solver_infeasible": 3,
+    "surrogate_infeasible": 268
+  },
+  "first_feasible_evaluation": 14,
+  "timing": {
+    "geometry_s": 33.12791037559509,
+    "solver_s": 546.1286015510559,
+    "solver_calls": 1362,
+    "pinn_calls": 1898
+  },
+  "best": {
+    "number": 884,
+    "generation": 23,
+    "stage": "solver_feasible",
+    "gama1": 5.177447636957759,
+    "gama2_gear1": 1.4730351954055008,
+    "gama2_gear2": 2.641254435972164,
+    "beta3": 29.99786931075001,
+    "xt3": 0.39476878864423526,
+    "value": 1624.1142968250233,
+    "fitness": 1624.1142968250233,
+    "c1": -0.023700000000000054,
+    "c2": -0.41521381709043226,
+    "c3": -42.35919035856185,
+    "c4": -564.5350637382699,
+    "min_safety": 1.2737,
+    "kesai_L": 3.5347,
+    "kesai_R": -7.214,
+    "Pmax_pair1": 935.4649362617301,
+    "a_len_pair1": 28.820404820719077,
+    "Pmax_pair2": 688.6493605632932,
+    "a_len_pair2": 49.792393091454784
+  }
+}
